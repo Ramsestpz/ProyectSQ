@@ -1,11 +1,70 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import { Dashboard } from '../components/dashboard/Dashboard';
+import pool from '../lib/db';
+import { Auth } from '../lib/auth';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const userId = Auth.getUserFromRequest(Astro.request);
+
+if (!userId) {
+    return Astro.redirect('/login');
+}
+
+// Fetch meals (Direct DB query to avoid Auth loopback issues)
+const todayStr = new Date().toISOString().split('T')[0];
+const [mealRows]: any[] = await pool.query('SELECT * FROM meals WHERE user_id = ? AND date = ?', [userId, todayStr]);
+
+const meals = (mealRows as any[]).map(row => ({
+    id: row.id.toString(),
+    title: row.title,
+    description: row.description,
+    calories: row.calories,
+    protein: row.protein,
+    carbs: row.carbs,
+    fat: row.fat,
+    image: row.image_url || 'https://via.placeholder.com/150',
+    time: row.preparation_time,
+    type: row.meal_type,
+    date: typeof row.date === 'string' ? row.date : row.date.toISOString().split('T')[0],
+    isVegetarian: Boolean(row.is_vegetarian)
+}));
+
+// Fetch Nutrition Progress (Target vs Current)
+// For now, mock targets or fetch from DB if table exists. 
+// We'll calculate current from meals.
+const [targetRows]: any[] = await pool.query('SELECT * FROM nutrient_targets WHERE user_id = ?', [userId]);
+const target = targetRows[0] || { calories_target: 2000, protein_target: 150, carbs_target: 250, fat_target: 70 };
+
+const currentNutrition = meals.reduce((acc: any, meal: any) => ({
+    calories: acc.calories + meal.calories,
+    protein: acc.protein + meal.protein,
+    carbs: acc.carbs + meal.carbs,
+    fat: acc.fat + meal.fat
+}), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+const nutritionProgress = {
+    calories: { current: currentNutrition.calories, target: target.calories_target },
+    protein: { current: currentNutrition.protein, target: target.protein_target },
+    carbs: { current: currentNutrition.carbs, target: target.carbs_target },
+    fat: { current: currentNutrition.fat, target: target.fat_target },
+    weeklyProtein: [70, 80, 110, 90, 85, 95, 100] // Mock
+};
+
+// Fetch Grocery Items
+const [groceryRows]: any[] = await pool.query('SELECT * FROM grocery_items WHERE user_id = ?', [userId]);
+const groceryItems = (groceryRows as any[]).map(row => ({
+    id: row.id.toString(),
+    name: row.name,
+    checked: Boolean(row.is_checked)
+}));
+
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="NutriPlan - Panel Principal">
+    <Dashboard 
+        client:load 
+        initialMeals={meals} 
+        initialProgress={nutritionProgress} 
+        initialGroceryItems={groceryItems} 
+    />
 </Layout>
