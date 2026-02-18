@@ -27,16 +27,20 @@ export const POST: APIRoute = async ({ request }) => {
         const [rows]: any[] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
 
         if (rows.length === 0) {
+            console.log(`Login failed: User not found for email '${email}'`);
             return new Response(JSON.stringify({ error: 'Credenciales inválidas' }), { status: 401 });
         }
 
         const user = rows[0];
+        console.log(`User found: ${user.id}, Verifying password...`);
         const isValid = await Auth.verifyPassword(password, user.password);
 
         if (!isValid) {
+            console.log(`Login failed: Invalid password for user ${user.id}`);
             return new Response(JSON.stringify({ error: 'Credenciales inválidas' }), { status: 401 });
         }
 
+        console.log(`Login successful for user ${user.id}. Creating session.`);
         const sessionToken = Auth.createSessionToken(user.id);
 
         // Calculate expiration (e.g., 7 days)

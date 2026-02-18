@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Clock, Flame, Utensils } from 'lucide-react';
+import { X, Clock, Flame } from 'lucide-react';
 import type { Meal } from '../../types/Meal';
 import { Button } from '../ui/Button';
 
@@ -44,7 +44,7 @@ export const MealModal: React.FC<MealModalProps> = ({ isOpen, onClose, onSubmit,
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault();
         onSubmit(formData);
         onClose();

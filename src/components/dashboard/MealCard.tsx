@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Clock, Flame, Info, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import { Clock, Flame, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import { Card } from '../ui/Card';
 import type { Meal } from '../../types/Meal';
 

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Menu, X, User, LogOut, PieChart, Home } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, X, LogOut, PieChart, Home } from 'lucide-react';
 
 export const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);

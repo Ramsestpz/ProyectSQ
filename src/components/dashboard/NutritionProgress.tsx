@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '../ui/Card';
-import { Flame, Activity, Zap, Droplet } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import type { NutritionProgress as NutritionType } from '../../types/Nutrition';
 
 interface NutritionProgressProps {

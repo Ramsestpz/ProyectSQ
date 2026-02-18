@@ -35,7 +35,7 @@ export const GroceryList: React.FC<GroceryListProps> = ({ initialItems }) => {
         }
     };
 
-    const addItem = async (e: React.FormEvent) => {
+    const addItem = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
 
